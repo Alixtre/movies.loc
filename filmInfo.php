@@ -13,7 +13,14 @@ if (!isset($_GET['id'])) {
     $id = $_GET['id'];
 }
 
-$film_data = $dbConnect->query("SELECT * FROM Films WHERE film_id=" . $id)->fetch(PDO::FETCH_ASSOC);
+
+$stmt = $dbConnect->prepare("SELECT * FROM Films WHERE film_id=:id");
+$stmt->execute(
+    [
+        "id" => $id
+    ]
+);
+$film_data = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <html>

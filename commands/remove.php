@@ -3,17 +3,29 @@ require_once dirname(__FILE__, 2) . DIRECTORY_SEPARATOR . "config.php";
 
 $id = $_GET['id'];
 
-$allFilmsId = $dbConnect->query(
+$stmt = $dbConnect->prepare(
     "SELECT film_id FROM Favorite
     INNER JOIN Users
     ON Favorite.user_id = Users.user_id
-    WHERE user_email = \"" . $_SESSION['user'] . "\""
-)->fetchAll(PDO::FETCH_COLUMN);
+    WHERE user_email = :email"
+);
+$stmt->execute(
+    [
+        "email" => $_SESSION['user']
+    ]
+);
+$allFilmsId = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-$UserID = $dbConnect->query(
+$stmt = $dbConnect->prepare(
     "SELECT user_id FROM Users
-    WHERE user_email = \"" . $_SESSION['user'] . "\""
-)->fetchColumn();
+    WHERE user_email = :email"
+);
+$stmt->execute(
+    [
+        "email" => $_SESSION['user']
+    ]
+);
+$userID = $stmt->fetchColumn();
 
 if (in_array($id, $allFilmsId)) {
     $stmt = $dbConnect->prepare(
@@ -23,7 +35,7 @@ if (in_array($id, $allFilmsId)) {
     $stmt->execute(
         [
             "film_id" => $id,
-            "user_id" => $UserID
+            "user_id" => $userID
         ]
     );
 }

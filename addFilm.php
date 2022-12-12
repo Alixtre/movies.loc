@@ -49,7 +49,7 @@ if (!empty($_POST)) {
                 "director" => $_POST['director']
             ]
         );
-        header("Location: /index.php");
+        header("Location: /filmsList");
         die();
     }
 }

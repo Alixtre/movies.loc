@@ -33,6 +33,16 @@ $stmt->execute(
     ]
 );
 $filmData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$stmt = $dbConnect->prepare("SELECT COUNT(*) FROM Favorite INNER JOIN Users ON Favorite.user_id=Users.user_id WHERE user_email=:email");
+$stmt->execute(
+    [
+        "email" => $_SESSION['user']
+    ]
+);
+$total_results = $stmt->fetchColumn();
+$total_pages = ceil($total_results / $results_per_page);
 ?>
 
 <html>
@@ -92,13 +102,9 @@ $filmData = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tbody>
         </table>
         <div class="pagination d-flex justify-content-center">
-        
-            <ul class="pagination">
-                <?php 
-                $total_results = $dbConnect->query("SELECT COUNT(*) FROM Favorite INNER JOIN Users ON Favorite.user_id=Users.user_id WHERE user_email='" . $_SESSION['user'] . "'")->fetchColumn();
-                $total_pages = ceil($total_results / $results_per_page);
-                
 
+            <ul class="pagination">
+                <?php
                 if ($page >= 2) :
                 ?>
                     <li class="page-item">

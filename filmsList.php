@@ -18,10 +18,31 @@ if (!isset($_GET['page'])) {
 $start_from = ($page - 1) * $results_per_page;
 
 if (!empty($_GET['search']) && ($_GET['search'] !== "")) {
-    $filmData = $dbConnect->query("SELECT * FROM Films WHERE film_name LIKE '%" . $_GET['search'] . "%' ORDER BY film_name ASC LIMIT $start_from, $results_per_page")->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $dbConnect->prepare("SELECT * FROM Films WHERE film_name LIKE :search ORDER BY film_name ASC LIMIT $start_from, $results_per_page");
+    $stmt->execute(
+        [
+            "search" => "%" . $_GET['search'] . "%"
+        ]
+    );
 } else {
-    $filmData = $dbConnect->query("SELECT * FROM Films ORDER BY film_name ASC LIMIT $start_from, $results_per_page")->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $dbConnect->prepare("SELECT * FROM Films ORDER BY film_name ASC LIMIT $start_from, $results_per_page");
+    $stmt->execute();
 }
+$filmData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (!empty($_GET['search'])) {
+    $stmt = $dbConnect->prepare("SELECT COUNT(*) FROM Films WHERE film_name LIKE :search");
+    $stmt->execute(
+        [
+            "search" => "%" . $_GET['search'] . "%"
+        ]
+    );
+} else {
+    $stmt = $dbConnect->prepare("SELECT COUNT(*) FROM Films");
+    $stmt->execute();
+}
+$total_results = $stmt->fetchColumn();
+$total_pages = ceil($total_results / $results_per_page);
 
 ?>
 
@@ -86,15 +107,6 @@ if (!empty($_GET['search']) && ($_GET['search'] !== "")) {
         <div class="d-flex justify-content-center">
             <ul class="pagination">
                 <?php
-
-
-                if (!empty($_GET['search'])) {
-                    $total_results = $dbConnect->query("SELECT COUNT(*) FROM Films WHERE film_name LIKE '%" . $_GET['search'] . "%'")->fetchColumn();
-                } else {
-                    $total_results = $dbConnect->query("SELECT COUNT(*) FROM Films")->fetchColumn();
-                }
-                $total_pages = ceil($total_results / $results_per_page);
-
                 if ($page >= 2) :
                 ?>
                     <li class="page-item">
